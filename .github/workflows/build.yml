@@ -70,6 +70,7 @@ jobs:
           cd build/brailleback/braille/service/tables
           chmod +x mktranslationtables.sh copywithdeps.py
           ./mktranslationtables.sh
+          cd $GITHUB_WORKSPACE
           mkdir -p build/Soft-Braille-Keyboard/res/raw
           cp build/brailleback/braille/service/res/raw/translationtables.zip build/Soft-Braille-Keyboard/res/raw/
 
