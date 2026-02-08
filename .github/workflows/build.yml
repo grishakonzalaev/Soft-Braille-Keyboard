@@ -70,6 +70,8 @@ jobs:
           cd build/brailleback/braille/service/tables
           chmod +x mktranslationtables.sh copywithdeps.py
           ./mktranslationtables.sh
+          # Verify our Russian table (with "always \x0435 15" for е) is in the zip
+          unzip -p ../res/raw/translationtables.zip liblouis/tables/ru-ru-g1.utb | grep -q "always.*0435.*15" || (echo "ru-ru-g1.utb in zip is not our version"; exit 1)
 
       - name: Patch BrailleBack settings.gradle
         run: |
