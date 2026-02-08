@@ -31,7 +31,7 @@ space \x000A 0
 space \x000D 0
 space \s 0 blank	
 replace \x0007
-punctuation ! 2346				# 33
+noback punctuation ! 2346			# 33 (2346 = ы in Russian back-translation)
 punctuation " 5						# 34
 noback sign # 3456						# 35 (3456 = numsign in back-translation)
 noback sign $ 1246						# 36 (1246 = я in back-translation, conflict)
@@ -46,7 +46,7 @@ punctuation , 6						# 44
 punctuation - 36					# 45
 punctuation . 46					# 46
 math / 34									# 47
-punctuation \x00AB 236
+noback punctuation \x00AB 236		# 236 = ! in Russian back-translation
 punctuation \x00BB 356
 include loweredDigits6Dots.uti
 noback punctuation : 156				# 58 (156 = ш in Russian back-translation)
@@ -134,9 +134,9 @@ punctuation \x2014 36-36		# em dash
 punctuation	\x2018 6-236			# 8216	smart single left quotation mark
 punctuation	\x2019 356-3			# 8217	smart single right quotation mark
 
-punctuation	\x201C 236		# 8220	smart opening double quote
+noback punctuation	\x201C 236	# 8220 (236 = ! in Russian back-translation)
 punctuation	\x201D 356		# 8221	smart closing double quote
-punctuation	\x201E 236		# 8222	smart double low quotation mark
+noback punctuation	\x201E 236	# 8222 (236 = ! in Russian back-translation)
 punctuation	\x201F 356		# 8223	smart double high reverse quotation mark
 
 punctuation \x2026 256-256-256 	# 8230 smart ellipsis
@@ -307,9 +307,9 @@ punctuation \x2014 36-36		# em dash
 prepunc ( 126
 postpunc ) 345
 begword ` 6-236
-prepunc " 236
+noback prepunc " 236			# 236 = ! in Russian back-translation
 postpunc " 356
-always \x00AB 236 (opening quotation mark) 
+noback always \x00AB 236		# 236 = ! in Russian back-translation 
 always \x00BB 356 (closing quotation mark)
 prepunc ' 6-236
 postpunc ' 356-3
@@ -363,10 +363,13 @@ always \x044A 12356
 always \x042C 23456
 always \x044C 23456
 
-# Force е, ё, н for 15/16/1345 — override Euro, asterisk, begnum # in Russian
+# Force е, ё, н, ы, ! for 15/16/1345/2346/236 in Russian
 always \x0415 15
 always \x0435 15
 always \x0401 16
 always \x0451 16
 always \x041D 1345
 always \x043D 1345
+always \x042B 2346
+always \x044B 2346
+always \x0021 236

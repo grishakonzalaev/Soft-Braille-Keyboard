@@ -74,22 +74,13 @@ jobs:
           echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
           echo "project(':softbraillekeyboard').projectDir = new File(settingsDir, '../../Soft-Braille-Keyboard')" >> build/brailleback/braille/settings.gradle
 
-      - name: Patch service for NDK r25b (armeabi-v7a only - strip tools missing for arm64)
+      - name: Fix NDK r25 strip (symlink llvm-strip for arm64, etc.)
         run: |
-          python3 << 'PY'
-          path = 'build/brailleback/braille/service/build.gradle'
-          with open(path) as f:
-            content = f.read()
-          # Insert ndk { abiFilters } after testInstrumentationRunner line
-          old = 'testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"'
-          new = '''testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
- ndk {
-  abiFilters 'armeabi-v7a'
- }'''
-          content = content.replace(old, new)
-          with open(path, 'w') as f:
-            f.write(content)
-          PY
+          NDK_BIN="${{ steps.ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          cd "$NDK_BIN"
+          for tool in aarch64-linux-android-strip arm-linux-androideabi-strip i686-linux-android-strip x86_64-linux-android-strip; do
+            [ ! -e "$tool" ] && ln -sf llvm-strip "$tool" && echo "Created $tool -> llvm-strip"
+          done
 
       - name: Patch BrailleBack jni/Android.mk (exclude brlttywrapper - NDK r25b duplicate module)
         run: |
