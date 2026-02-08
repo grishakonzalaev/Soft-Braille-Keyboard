@@ -58,6 +58,10 @@ jobs:
           echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
           echo "project(':softbraillekeyboard').projectDir = new File(settingsDir, '../../Soft-Braille-Keyboard')" >> build/brailleback/braille/settings.gradle
 
+      - name: Patch Soft-Braille-Keyboard for AGP 3.6
+        run: |
+          sed -i "/namespace 'com.dalton.braillekeyboard'/d" build/Soft-Braille-Keyboard/build.gradle
+
       - name: Patch local.properties
         run: |
           cat > build/brailleback/braille/local.properties << EOF
@@ -87,13 +91,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SoftBrailleKeyboard-release
-          path: build/brailleback/braille/softbraillekeyboard/build/outputs/apk/release/*.apk
+          path: build/Soft-Braille-Keyboard/build/outputs/apk/release/*.apk
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: build/brailleback/braille/softbraillekeyboard/build/outputs/apk/release/*.apk
+          files: build/Soft-Braille-Keyboard/build/outputs/apk/release/*.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
