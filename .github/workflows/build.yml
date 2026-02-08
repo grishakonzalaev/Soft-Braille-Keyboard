@@ -65,6 +65,8 @@ jobs:
 
       - name: Apply Russian braille table and rebuild translationtables.zip
         run: |
+          # tablelist-brailleback.patch changes ru-litbrl.ctb → ru-ru-g1.utb in tablelist.xml
+          patch -p0 -d build/brailleback < build/Soft-Braille-Keyboard/third_party/BrailleBack/tablelist-brailleback.patch
           cp build/Soft-Braille-Keyboard/braille-tables/ru-ru-g1.utb build/brailleback/braille/service/jni/liblouiswrapper/liblouis/tables/
           cp build/Soft-Braille-Keyboard/ci-scripts/copywithdeps.py build/brailleback/braille/service/tables/
           cd build/brailleback/braille/service/tables
