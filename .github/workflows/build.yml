@@ -74,6 +74,10 @@ jobs:
           echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
           echo "project(':softbraillekeyboard').projectDir = new File(settingsDir, '../../Soft-Braille-Keyboard')" >> build/brailleback/braille/settings.gradle
 
+      - name: Patch service for NDK r25b (armeabi-v7a only - strip tools missing for arm64)
+        run: |
+          sed -i "s/'armeabi-v7a', 'arm64-v8a'/'armeabi-v7a'/g" build/brailleback/braille/service/build.gradle
+
       - name: Patch BrailleBack jni/Android.mk (exclude brlttywrapper - NDK r25b duplicate module)
         run: |
           cat > build/brailleback/braille/service/jni/Android.mk << 'EOF'
