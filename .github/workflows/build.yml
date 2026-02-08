@@ -40,6 +40,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Upgrade Gradle for Java 17 compatibility
+        run: |
+          sed -i 's|gradle-8.5-all|gradle-8.10.2-all|' build/brailleback/braille/gradle/wrapper/gradle-wrapper.properties
+
       - name: Setup release keystore
         if: github.event_name != 'pull_request'
         run: |
