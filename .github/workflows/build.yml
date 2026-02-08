@@ -63,7 +63,13 @@ jobs:
           cp -r build/brailleback/third_party/liblouislib/tables build/brailleback/braille/service/jni/liblouiswrapper/liblouis/
           cd build/brailleback && patch -p1 < liblouis.patch
 
-      # translationtables.zip with ru-ru-g1.utb is committed in res/raw/
+      - name: Apply Russian braille table and rebuild translationtables.zip
+        run: |
+          cp build/Soft-Braille-Keyboard/braille-tables/ru-ru-g1.utb build/brailleback/braille/service/jni/liblouiswrapper/liblouis/tables/
+          cp build/Soft-Braille-Keyboard/ci-scripts/copywithdeps.py build/brailleback/braille/service/tables/
+          cd build/brailleback/braille/service/tables
+          chmod +x mktranslationtables.sh copywithdeps.py
+          ./mktranslationtables.sh
 
       - name: Patch BrailleBack settings.gradle
         run: |
