@@ -53,6 +53,14 @@ jobs:
           mv brailleback build/
           ls -la build/
 
+      - name: Setup liblouis for JNI
+        run: |
+          git clone --depth 1 --branch v3.4.0 https://github.com/liblouis/liblouis.git build/brailleback/third_party/liblouislib
+          mkdir -p build/brailleback/braille/service/jni/liblouiswrapper/liblouis
+          cp -r build/brailleback/third_party/liblouislib/liblouis build/brailleback/braille/service/jni/liblouiswrapper/liblouis/
+          cp -r build/brailleback/third_party/liblouislib/tables build/brailleback/braille/service/jni/liblouiswrapper/liblouis/
+          cd build/brailleback && patch -p1 < liblouis.patch
+
       - name: Patch BrailleBack settings.gradle
         run: |
           echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
