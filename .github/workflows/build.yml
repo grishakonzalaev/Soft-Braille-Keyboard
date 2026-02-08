@@ -64,7 +64,7 @@ jobs:
       - name: Apply Russian braille table and rebuild translationtables.zip
         run: |
           cp build/Soft-Braille-Keyboard/braille-tables/ru-ru-g1.utb build/brailleback/braille/service/jni/liblouiswrapper/liblouis/tables/
-          sed -i 's/f\.xreadlines()/f/g' build/brailleback/braille/service/tables/copywithdeps.py
+          cp build/Soft-Braille-Keyboard/ci-scripts/copywithdeps.py build/brailleback/braille/service/tables/
           cd build/brailleback/braille/service/tables
           chmod +x mktranslationtables.sh copywithdeps.py
           ./mktranslationtables.sh
