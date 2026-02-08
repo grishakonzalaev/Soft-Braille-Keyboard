@@ -61,16 +61,12 @@ jobs:
           cp -r build/brailleback/third_party/liblouislib/tables build/brailleback/braille/service/jni/liblouiswrapper/liblouis/
           cd build/brailleback && patch -p1 < liblouis.patch
 
-      - name: Apply Russian braille table fixes (е, ё, ш, н, ы, !)
+      - name: Apply Russian braille table and rebuild translationtables.zip
         run: |
-          OUR_TABLE=$GITHUB_WORKSPACE/build/Soft-Braille-Keyboard/braille-tables/ru-ru-g1.utb
-          cp "$OUR_TABLE" build/brailleback/braille/service/jni/liblouiswrapper/liblouis/tables/
-          cd build/brailleback/braille/service/res/raw
-          rm -rf liblouis
-          unzip -o translationtables.zip
-          cp "$OUR_TABLE" liblouis/tables/
-          rm -f translationtables.zip
-          zip -r translationtables.zip liblouis
+          cp build/Soft-Braille-Keyboard/braille-tables/ru-ru-g1.utb build/brailleback/braille/service/jni/liblouiswrapper/liblouis/tables/
+          cd build/brailleback/braille/service/tables
+          chmod +x mktranslationtables.sh copywithdeps.py
+          ./mktranslationtables.sh
 
       - name: Patch BrailleBack settings.gradle
         run: |
