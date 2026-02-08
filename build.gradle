@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.dalton.braillekeyboard'
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
 
