@@ -58,6 +58,14 @@ jobs:
           echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
           echo "project(':softbraillekeyboard').projectDir = new File(settingsDir, '../../Soft-Braille-Keyboard')" >> build/brailleback/braille/settings.gradle
 
+      - name: Patch BrailleBack jni/Android.mk (exclude brlttywrapper - NDK r25b duplicate module)
+        run: |
+          cat > build/brailleback/braille/service/jni/Android.mk << 'EOF'
+          # Include only liblouiswrapper - needed for braille translation.
+          # Brlttywrapper (braille displays) has NDK r25b compatibility issues.
+          include $(call my-dir)/liblouiswrapper/Android.mk
+          EOF
+
       - name: Patch Soft-Braille-Keyboard for AGP 3.6
         run: |
           sed -i "/namespace 'com.dalton.braillekeyboard'/d" build/Soft-Braille-Keyboard/build.gradle
