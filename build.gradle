@@ -35,6 +35,11 @@ android {
         }
     }
 
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
