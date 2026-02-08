@@ -17,6 +17,18 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: tools platform-tools "platforms;android-28" "build-tools;28.0.3"
+
+      - name: Set up Android NDK
+        id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25b
+          link-to-sdk: true
+
       - name: Checkout Soft-Braille-Keyboard
         uses: actions/checkout@v4
         with:
@@ -39,6 +51,13 @@ jobs:
         run: |
           echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
           echo "project(':softbraillekeyboard').projectDir = new File(settingsDir, '../../Soft-Braille-Keyboard')" >> build/brailleback/braille/settings.gradle
+
+      - name: Patch local.properties
+        run: |
+          cat > build/brailleback/braille/local.properties << EOF
+          sdk.dir=$ANDROID_HOME
+          ndk.dir=${{ steps.ndk.outputs.ndk-path }}
+          EOF
 
       - name: Setup release keystore
         if: github.event_name != 'pull_request'
