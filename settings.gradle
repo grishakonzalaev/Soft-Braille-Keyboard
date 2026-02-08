@@ -1,0 +1,2 @@
+// This file is not used - build is run from brailleback/braille/
+rootProject.name = 'SoftBrailleKeyboard'

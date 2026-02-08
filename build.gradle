@@ -1,0 +1,38 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.dalton.braillekeyboard'
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+
+    defaultConfig {
+        applicationId "com.dalton.braillekeyboard"
+        minSdkVersion 14
+        targetSdkVersion 24
+        versionCode 55
+        versionName "3.0-2"
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation project(':client')
+    implementation project(':service')
+    implementation 'com.android.support:support-v4:28.0.0'
+}
