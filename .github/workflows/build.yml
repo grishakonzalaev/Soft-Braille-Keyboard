@@ -1,0 +1,74 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [master, main]
+    tags: ['v*']
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Soft-Braille-Keyboard
+        uses: actions/checkout@v4
+        with:
+          path: Soft-Braille-Keyboard
+
+      - name: Clone BrailleBack
+        run: |
+          # Для ru-ru-g1.utb и ZipResourceExtractor — форкни brailleback и подставь свой URL:
+          # git clone https://github.com/YOUR_USER/brailleback.git brailleback
+          git clone --depth 1 https://github.com/google/brailleback.git brailleback
+
+      - name: Link Soft-Braille-Keyboard
+        run: |
+          mkdir -p build
+          mv Soft-Braille-Keyboard build/
+          mv brailleback build/
+          ls -la build/
+
+      - name: Patch BrailleBack settings.gradle
+        run: |
+          echo "include ':softbraillekeyboard'" >> build/brailleback/braille/settings.gradle
+          echo "project(':softbraillekeyboard').projectDir = new File(settingsDir, '../../Soft-Braille-Keyboard')" >> build/brailleback/braille/settings.gradle
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup release keystore
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > build/brailleback/braille/release.keystore
+            echo "KEYSTORE_FILE=$GITHUB_WORKSPACE/build/brailleback/braille/release.keystore" >> $GITHUB_ENV
+            echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+          fi
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x build/brailleback/braille/gradlew
+
+      - name: Build Release APK
+        working-directory: build/brailleback/braille
+        run: ./gradlew :softbraillekeyboard:assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoftBrailleKeyboard-release
+          path: build/brailleback/braille/softbraillekeyboard/build/outputs/apk/release/*.apk
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/brailleback/braille/softbraillekeyboard/build/outputs/apk/release/*.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

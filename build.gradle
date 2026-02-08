@@ -5,12 +5,27 @@ android {
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
 
+    signingConfigs {
+        release {
+            def keystoreFile = System.getenv("KEYSTORE_FILE")
+            def keystorePass = System.getenv("KEYSTORE_PASSWORD")
+            def keyAlias = System.getenv("KEY_ALIAS")
+            def keyPass = System.getenv("KEY_PASSWORD")
+            if (keystoreFile != null && keystorePass != null && keyAlias != null && keyPass != null) {
+                storeFile file(keystoreFile)
+                storePassword keystorePass
+                keyAlias keyAlias
+                keyPassword keyPass
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "com.dalton.braillekeyboard"
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 55
-        versionName "3.0-2"
+        versionCode 40
+        versionName "4.0"
     }
 
     sourceSets {
@@ -27,6 +42,9 @@ android {
         }
         release {
             minifyEnabled false
+            if (signingConfigs.release.storeFile != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
