@@ -31,6 +31,7 @@ import android.preference.PreferenceManager;
 
 import com.googlecode.eyesfree.braille.translate.BrailleTranslator;
 import com.googlecode.eyesfree.braille.translate.TableInfo;
+import com.googlecode.eyesfree.braille.translate.TranslatorClient;
 import com.googlecode.eyesfree.braille.translate.TranslatorClient.OnInitListener;
 
 /**
@@ -147,7 +148,7 @@ public class BrailleParser {
         }
     }
 
-    private final MyTranslatorClient client;
+    private final TranslatorClient client;
     private final SharedPreferences sharedPref;
     private final BrailleParserListener listener;
     private final List<String> tableIds;
@@ -173,7 +174,7 @@ public class BrailleParser {
                 R.array.braille_tables);
         tableIds = Arrays.asList(ids);
 
-        client = new MyTranslatorClient(context, new OnInitListener() {
+        client = new TranslatorClient(context, new OnInitListener() {
 
             @Override
             public void onInit(int status) {
@@ -369,7 +370,91 @@ public class BrailleParser {
      * @return The back translation String or null if no backtranslation was
      *         possible.
      */
+    // Dot 6 in 6-dot braille (bit 5)
+    private static final byte DOT_6 = 32;
+    // Number sign 3456 in 6-dot braille
+    private static final byte NUMSIGN = 60; // dots 3,4,5,6
+    // litdigits6Dots: 0=245, 1=1, 2=12, 3=14, 4=145, 5=15, 6=124, 7=1245, 8=125, 9=24
+    private static final byte[] DIGIT_CELLS = { 26, 1, 3, 9, 25, 17, 11, 27, 19, 10 }; // 0..9
+
     public String backTranslate(Context context, Byte[] cellBytes) {
+        if (status == STATUS_OK && cellBytes.length >= 2) {
+            TableInfo table = getTable(context);
+            if (table != null && "ru-g1".equals(table.getId())) {
+                int n = cellBytes.length;
+                Byte prev = cellBytes[n - 2];
+                Byte last = cellBytes[n - 1];
+                int lastVal = last != null ? last.byteValue() & 0xFF : 0;
+
+                // Numsign (3456) + digits: table may output #, handle in app
+                int digitsStart = findNumsignDigitsStart(cellBytes);
+                if (digitsStart >= 0) {
+                    StringBuilder num = new StringBuilder();
+                    for (int i = digitsStart; i < n; i++) {
+                        int d = digitFromCell(cellBytes[i] != null ? cellBytes[i].byteValue() & 0xFF : 0);
+                        if (d < 0) break;
+                        num.append(Character.forDigit(d, 10));
+                    }
+                    if (num.length() > 0) {
+                        String prefix = "";
+                        if (digitsStart > 0) {
+                            Byte[] prefixCells = Arrays.copyOf(cellBytes, digitsStart);
+                            prefix = backTranslateInternal(context, prefixCells);
+                            if (prefix == null) prefix = "";
+                        }
+                        return prefix + num.toString();
+                    }
+                }
+
+                // Dot 6 + letter: capital letter (table uses 6 for comma)
+                if (prev != null && prev.byteValue() == DOT_6 && last != null
+                        && last.byteValue() != DOT_6 && last.byteValue() != 0) {
+                    String prefix = "";
+                    if (n > 2) {
+                        Byte[] prefixCells = Arrays.copyOf(cellBytes, n - 2);
+                        prefix = backTranslateInternal(context, prefixCells);
+                        if (prefix == null) prefix = "";
+                    }
+                    String letter = backTranslateInternal(context, new Byte[] { last });
+                    if (letter != null && letter.length() == 1) {
+                        return prefix
+                                + Character.toString(
+                                        Character.toUpperCase(letter.charAt(0)));
+                    }
+                }
+            }
+        }
+
+        return backTranslateInternal(context, cellBytes);
+    }
+
+    // litdigits6Dots: 0=245(26), 1=1(1), 2=12(3), 3=14(9), 4=145(25), 5=15(17),
+    // 6=124(11), 7=1245(27), 8=125(19), 9=24(10)
+    private static int digitFromCell(int cellValue) {
+        for (int i = 0; i < DIGIT_CELLS.length; i++) {
+            if ((DIGIT_CELLS[i] & 0xFF) == cellValue) return i;
+        }
+        return -1;
+    }
+
+    // Returns index of first digit if sequence ends with numsign + one or more digits, else -1
+    private static int findNumsignDigitsStart(Byte[] cellBytes) {
+        int n = cellBytes.length;
+        if (n < 2) return -1;
+        int end = n - 1;
+        int lastVal = cellBytes[end] != null ? cellBytes[end].byteValue() & 0xFF : 0;
+        if (digitFromCell(lastVal) < 0) return -1;
+        int start = end;
+        while (start > 0) {
+            int prevVal = cellBytes[start - 1] != null ? cellBytes[start - 1].byteValue() & 0xFF : 0;
+            if (digitFromCell(prevVal) >= 0) start--;
+            else if (prevVal == NUMSIGN) return start;
+            else return -1;
+        }
+        return (start == 0 && cellBytes[0] != null && cellBytes[0].byteValue() == NUMSIGN) ? 1 : -1;
+    }
+
+    private String backTranslateInternal(Context context, Byte[] cellBytes) {
         // Convert from a Byte[] to a byte[]O
         byte[] cells = new byte[cellBytes.length + 2];
         // Pad the cells so that we have spaces on each size. This makes the
@@ -395,7 +480,7 @@ public class BrailleParser {
     // Called when the BrailleTranslator becomes ready.
     private void ready(Context context, int translatorClientStatus) {
         if (client != null
-                && translatorClientStatus == MyTranslatorClient.SUCCESS) {
+                && translatorClientStatus == TranslatorClient.SUCCESS) {
             status = STATUS_OK;
             tables = client.getTables();
             setTranslator(context);

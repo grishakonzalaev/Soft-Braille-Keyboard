@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
+import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.view.KeyEvent;
@@ -403,20 +404,17 @@ public class BrailleIME extends InputMethodService implements KeyboardListener {
             ic.setComposingText(composingText.toString(),
                     composingText.length());
         } else if (text.length() > 0) {
-            // We have something to write to the field.
-            // The IME could do strange things with our input here.
-            // First clear our last text translation from n-1 Braille cells.
             ic.deleteSurroundingText(composingText.length(), 0);
             composingText.setLength(0);
             composingText.append(text);
 
-            // Now write the text corresponding to n Braille cells.
-            // We must write individual characters so that the input field
-            // doesn't misbehave.
-            // This is the case for some fields that do validation like banking
-            // apps for security and auto-completing fields.
-            for (int i = 0; i < text.length(); i++) {
-                ic.commitText(text.subSequence(i, i + 1), 1);
+            boolean batch = ic.beginBatchEdit();
+            try {
+                for (int i = 0; i < text.length(); i++) {
+                    ic.commitText(text.subSequence(i, i + 1), 1);
+                }
+            } finally {
+                if (batch) ic.endBatchEdit();
             }
         }
 
@@ -458,7 +456,7 @@ public class BrailleIME extends InputMethodService implements KeyboardListener {
             break;
         case Keyboard.KEYCODE_DONE:
         case '\n':
-            keyDownUp(ic, KeyEvent.KEYCODE_ENTER);
+            performEnterOrEditorAction(ic);
             break;
         default:
             if (keyCode >= '0' && keyCode <= '9') {
@@ -472,10 +470,25 @@ public class BrailleIME extends InputMethodService implements KeyboardListener {
 
     /**
      * Helper to send a key down / key up pair to the current editor.
+     * Use timestamps so apps (e.g. Telegram) properly recognize the key press.
      */
     private void keyDownUp(InputConnection ic, int keyEventCode) {
-        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyEventCode));
-        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyEventCode));
+        long now = SystemClock.uptimeMillis();
+        ic.sendKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyEventCode, 0));
+        ic.sendKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyEventCode, 0));
+    }
+
+    /**
+     * Performs the editor action (Go, Send, Search, etc.) or inserts newline.
+     * Always send KeyEvent.KEYCODE_ENTER - many apps (Telegram, etc.) only
+     * react to the key. performEditorAction alone often fails.
+     */
+    private void performEnterOrEditorAction(InputConnection ic) {
+        EditorInfo editorInfo = getCurrentInputEditorInfo();
+        if (editorInfo != null && editorInfo.actionId != EditorInfo.IME_ACTION_NONE) {
+            ic.performEditorAction(editorInfo.actionId);
+        }
+        keyDownUp(ic, KeyEvent.KEYCODE_ENTER);
     }
 
     private boolean setSelection(int start, int end) {
