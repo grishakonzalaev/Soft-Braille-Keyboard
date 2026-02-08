@@ -70,6 +70,8 @@ jobs:
           cd build/brailleback/braille/service/tables
           chmod +x mktranslationtables.sh copywithdeps.py
           ./mktranslationtables.sh
+          mkdir -p build/Soft-Braille-Keyboard/res/raw
+          cp build/brailleback/braille/service/res/raw/translationtables.zip build/Soft-Braille-Keyboard/res/raw/
 
       - name: Patch BrailleBack settings.gradle
         run: |
