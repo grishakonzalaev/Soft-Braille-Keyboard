@@ -65,14 +65,16 @@ jobs:
 
       - name: Apply Russian braille table and rebuild translationtables.zip
         run: |
+          # Replace ru-litbrl.ctb with ru-ru-g1.utb in tablelist.xml (Google brailleback uses ru-litbrl)
+          sed -i 's/ru-litbrl\.ctb/ru-ru-g1.utb/g' build/brailleback/braille/service/res/xml/tablelist.xml
           cp build/Soft-Braille-Keyboard/braille-tables/ru-ru-g1.utb build/brailleback/braille/service/jni/liblouiswrapper/liblouis/tables/
           cp build/Soft-Braille-Keyboard/ci-scripts/copywithdeps.py build/brailleback/braille/service/tables/
           cd build/brailleback/braille/service/tables
           chmod +x mktranslationtables.sh copywithdeps.py
           ./mktranslationtables.sh
-          cd $GITHUB_WORKSPACE
-          mkdir -p build/Soft-Braille-Keyboard/res/raw
-          cp build/brailleback/braille/service/res/raw/translationtables.zip build/Soft-Braille-Keyboard/res/raw/
+          # Verify our Russian table (with "always \x0435 15" for е) is in the zip
+          unzip -l ../res/raw/translationtables.zip | grep ru-ru-g1 || (echo "ru-ru-g1.utb not in zip"; exit 1)
+          unzip -p ../res/raw/translationtables.zip '*/ru-ru-g1.utb' | grep -q "always.*0435.*15" || (echo "ru-ru-g1.utb in zip is not our version"; exit 1)
 
       - name: Patch BrailleBack settings.gradle
         run: |
