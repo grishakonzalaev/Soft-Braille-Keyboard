@@ -36,7 +36,7 @@ punctuation " 5						# 34
 noback sign # 3456						# 35 (3456 = numsign in back-translation)
 noback sign $ 1246						# 36 (1246 = я in back-translation, conflict)
 sign % 146		# 37
-sign & 12346							# 38
+noback sign & 12346						# 38 (12346 = й in Russian back-translation)
 punctuation ' 3						# 39 apostrophe
 punctuation ( 126				# 40 left paren: 126, not 12356 (ъ)
 punctuation ) 345				# 41 right paren: 345, not 23456 (ь)
@@ -336,7 +336,7 @@ always + 235
 endnum % 3456-245-356 
 always ^ 4
 always ~ 12456
-always & 12346
+noback always & 12346
 always * 35
 midword \x2019 3	# stupid smart apostrophe
 always [ 45
@@ -363,9 +363,11 @@ always \x044A 12356
 always \x042C 23456
 always \x044C 23456
 
-# Force е, ё, н, ы, ! for 15/16/1345/2346/236 in Russian
+# Force е, ё, й, н, ы, ! for 15/16/12346/1345/2346/236 in Russian
 always \x0415 15
 always \x0435 15
+always \x0419 12346
+always \x0439 12346
 always \x0401 16
 always \x0451 16
 always \x041D 1345
