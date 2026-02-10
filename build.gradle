@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     namespace 'com.dalton.braillekeyboard'
     compileSdkVersion 33
+    buildToolsVersion "28.0.3"
 
     signingConfigs {
         // Use same key for debug and release so you can update debug↔release without reinstall.
