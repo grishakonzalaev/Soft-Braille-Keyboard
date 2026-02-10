@@ -1,0 +1,9 @@
+# Copy to local.properties and set your release keystore so debug and release
+# are signed with the same key (no INSTALL_FAILED_UPDATE_INCOMPATIBLE).
+# local.properties is gitignored.
+
+# sdk.dir is set by Android Studio; add these for signing:
+KEYSTORE_FILE=path/to/your/release.keystore
+KEYSTORE_PASSWORD=your_store_password
+KEY_ALIAS=your_key_alias
+KEY_PASSWORD=your_key_password
