@@ -103,7 +103,7 @@ sign ` 4									# 96 grave accent
 punctuation { 246					# 123
 sign | 1256								# 124
 punctuation } 12456				# 125
-math ~ 45									# 126
+noback math ~ 45							# 126 (45 = capsletter in Russian, not tilde)
 
 space \X00A0 0						# 160 no-break space
 sign \x00A2 4-14					# 162 ¢ cents sign
@@ -171,7 +171,7 @@ uplow \x00C2\x00E2 1				# a with circumflex
 uplow \x00C3\x00E3 1				# a with tilde
 uplow \x00C4\x00E4 1				# a with dieresis
 uplow \x00C5\x00E5 1				# a with ring above
-uplow \x00C6\x00E6 1				# letter ae
+noback uplow \x00C6\x00E6 1		# letter ae (1 = а in Russian, not æ)
 uplow \x00C7\x00E7 14				# c with cedilla
 uplow \x00C8\x00E8 15				# e with grave
 uplow \x00C9\x00E9 15				# e with acute
@@ -215,8 +215,8 @@ largesign \x00E4   4-1      [E4] lower a dieresis
 largesign \x00C5 4-1      [C5] upper a ring
 largesign \x00E5   4-1      [E5] lower a ring
 
-largesign \x00C6 1-15     [C6] upper ae
-largesign \x00E6   1-15			[E6] lower ae
+noback largesign \x00C6 1-15     [C6] upper ae (1+15 = а+е in Russian)
+noback largesign \x00E6   1-15	[E6] lower ae
 
 largesign \x00C7 4-14     [C7] upper c cedilla
 largesign \x00E7   4-14     [E7] lower c cedilla
@@ -323,6 +323,8 @@ endnum ° 56-145-1245 ;dg degrees sign
 postpunc , 2
 hyphen - 36
 #capsnocont
+capsletter 45
+begcapsword 45-45
 postpunc . 256
 postpunc ; 23
 postpunc : 25
@@ -339,7 +341,7 @@ always ~ 12456
 noback always & 12346
 always * 35
 midword \x2019 3	# stupid smart apostrophe
-always [ 45
+noback always [ 45
 always ] 3456
 always { 46
 always } 6
@@ -363,7 +365,9 @@ always \x044A 12356
 always \x042C 23456
 always \x044C 23456
 
-# Force е, ё, й, н, ы, ! for 15/16/12346/1345/2346/236 in Russian
+# Force а, е, ё, й, н, ы, ! for 1/15/16/12346/1345/2346/236 in Russian
+always \x0410 1
+always \x0430 1
 always \x0415 15
 always \x0435 15
 always \x0419 12346
