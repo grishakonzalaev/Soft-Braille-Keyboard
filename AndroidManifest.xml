@@ -7,7 +7,7 @@
 
     <uses-sdk
         android:minSdkVersion="21"
-        android:targetSdkVersion="34" />
+        android:targetSdkVersion="33" />
     <!-- Required for targetSdk 30+: discover TTS engines (package visibility). -->
     <queries>
         <intent>

@@ -22,7 +22,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: "tools platform-tools platforms;android-34 build-tools;34.0.0"
+          packages: "tools platform-tools platforms;android-33 build-tools;33.0.2"
 
       - name: Set up Android NDK
         id: ndk
@@ -101,12 +101,12 @@ jobs:
         run: |
           sed -i "/namespace 'com.dalton.braillekeyboard'/d" build/Soft-Braille-Keyboard/build.gradle
 
-      - name: Patch BrailleBack modules for SDK 34 and build-tools 34 (AAPT2)
+      - name: Patch BrailleBack modules for SDK 33 and build-tools 33 (AAPT2)
         run: |
           for f in build/brailleback/braille/client/build.gradle build/brailleback/braille/service/build.gradle; do
-            sed -i 's/compileSdkVersion 28/compileSdkVersion 34/g' "$f"
-            sed -i 's/buildToolsVersion "28.0.3"/buildToolsVersion "34.0.0"/g' "$f"
-            sed -i 's/targetSdkVersion 26/targetSdkVersion 34/g' "$f"
+            sed -i 's/compileSdkVersion 28/compileSdkVersion 33/g' "$f"
+            sed -i 's/buildToolsVersion "28.0.3"/buildToolsVersion "33.0.2"/g' "$f"
+            sed -i 's/targetSdkVersion 26/targetSdkVersion 33/g' "$f"
             sed -i 's/minSdkVersion 14/minSdkVersion 21/g' "$f"
           done
 

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace 'com.dalton.braillekeyboard'
-    compileSdkVersion 34
+    compileSdkVersion 33
 
     signingConfigs {
         // Use same key for debug and release so you can update debug↔release without reinstall.
@@ -34,7 +34,7 @@ android {
     defaultConfig {
         applicationId "com.dalton.braillekeyboard"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 33
         versionCode 40
         versionName "4.0"
     }
