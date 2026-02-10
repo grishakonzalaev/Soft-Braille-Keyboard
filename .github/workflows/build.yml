@@ -101,6 +101,15 @@ jobs:
         run: |
           sed -i "/namespace 'com.dalton.braillekeyboard'/d" build/Soft-Braille-Keyboard/build.gradle
 
+      - name: Patch BrailleBack modules for SDK 34 and build-tools 34 (AAPT2)
+        run: |
+          for f in build/brailleback/braille/client/build.gradle build/brailleback/braille/service/build.gradle; do
+            sed -i 's/compileSdkVersion 28/compileSdkVersion 34/g' "$f"
+            sed -i 's/buildToolsVersion "28.0.3"/buildToolsVersion "34.0.0"/g' "$f"
+            sed -i 's/targetSdkVersion 26/targetSdkVersion 34/g' "$f"
+            sed -i 's/minSdkVersion 14/minSdkVersion 21/g' "$f"
+          done
+
       - name: Patch local.properties
         run: |
           cat > build/brailleback/braille/local.properties << EOF
@@ -124,7 +133,9 @@ jobs:
 
       - name: Build Release APK
         working-directory: build/brailleback/braille
-        run: ./gradlew :softbraillekeyboard:assembleRelease --no-daemon
+        env:
+          GRADLE_OPTS: -Xmx3072m -Dorg.gradle.jvmargs=-Xmx3072m
+        run: ./gradlew :softbraillekeyboard:assembleRelease --no-daemon --no-build-cache
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
